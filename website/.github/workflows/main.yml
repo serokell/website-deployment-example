@@ -1,0 +1,59 @@
+name: hello-world-app CI/CD
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - develop
+jobs:
+  check:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup cachix
+        uses: cachix/cachix-action@v12
+        with:
+          name: hello-world-cache
+          authToken: ${{ secrets.CACHIX_TOKEN }}
+      - name: build website
+        run: nix build -L .#hello-world-app
+      - name: check prettier
+        run: nix build -L .#checks.x86_64-linux.prettier-check
+      - name: check deploy schema
+        run: nix build -L .#checks.x86_64-linux.deploy-schema
+      - name: check deploy activate
+        run: nix build -L .#checks.x86_64-linux.deploy-activate
+  deploy-branch:
+    needs: check
+    if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' }}
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup cachix
+        uses: cachix/cachix-action@v12
+        with:
+          name: hello-world-cache
+          authToken: ${{ secrets.CACHIX_TOKEN }}
+      - uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: deploy
+        run: nix develop -c deploy .#hello-world-${GITHUB_REF##*/} --skip-checks
+  deploy-pr:
+    needs: check
+    if: ${{ github.event_name == 'pull_request' && github.ref != 'refs/heads/develop' }}
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup cachix
+        uses: cachix/cachix-action@v12
+        with:
+          name: hello-world-cache
+          authToken: ${{ secrets.CACHIX_TOKEN }}
+      - uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: deploy
+        run: |
+          echo "${{ github.event.number }}" > pr-number
+          nix develop -c deploy .#hello-world-pr --skip-checks

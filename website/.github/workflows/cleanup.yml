@@ -1,0 +1,22 @@
+name: Cleanup
+
+on:
+  pull_request:
+    types:
+      - closed
+jobs:
+  cleanup:
+    name: cleanup
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup cachix
+        uses: cachix/cachix-action@v12
+        with:
+          name: hello-world-cache
+          authToken: ${{ secrets.CACHIX_TOKEN }}
+      - uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: deploy ${{ inputs.branch }}
+        run: nix develop -c deploy .#cleanup --skip-checks

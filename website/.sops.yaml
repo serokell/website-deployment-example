@@ -1,0 +1,10 @@
+keys:
+  - &server age1fe4fk5wrfz952jzklu9fpmx2mq378t8hz0n47z6xrkmnjvyqtaqqg8y3dp
+  - &ops AEF0 79C6 7618 8929 4124  22DB 3AB4 2DF3 F50E 3420
+creation_rules:
+  - path_regex: secrets/secrets-(master|develop|pr).env$
+    key_groups:
+    - pgp:
+      - *ops
+      age:
+      - *server

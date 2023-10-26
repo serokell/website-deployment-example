@@ -1,0 +1,10 @@
+keys:
+  - &yk AEF0 79C6 7618 8929 4124  22DB 3AB4 2DF3 F50E 3420
+  - &server age1mfx2ynwx5jaee5822te3dw77k6qknk5x5uf03cg775e9z34p5frqvq846p
+creation_rules:
+  - path_regex: secrets/secrets.yaml$
+    key_groups:
+    - pgp:
+      - *yk
+      age:
+      - *server
