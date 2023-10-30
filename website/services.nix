@@ -79,7 +79,7 @@
   activate = pkgs.writeShellScriptBin "activate" ''
     set -euo pipefail
     export XDG_RUNTIME_DIR="/run/user/$UID"
-    mkdir -p "$HOME/.config/systemd/user" "$HOME/.config/systemd/user/default.target.wants"
+    mkdir -p "$HOME/.config/systemd/user/default.target.wants"
     ${copyServices}
     systemctl --user daemon-reload
     systemctl --user restart ${concatStringsSep " " serviceNames}

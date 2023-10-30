@@ -59,12 +59,12 @@
       hello-world-app-package = pkgs.buildYarnPackage {
         name = "hello-world-app-package";
         src = builtins.path { name = "hello-world-app"; path = ./hello-world-app; };
-        postInstall = ''
-          mv ./.next $out/
-        '';
         yarnBuild = ''
           yarn install
           yarn build
+        '';
+        postInstall = ''
+          mv ./.next $out/
         '';
       };
 
